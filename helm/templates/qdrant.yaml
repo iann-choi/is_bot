@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.qdrant.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qdrant
+  template:
+    metadata:
+      labels:
+        app: qdrant
+    spec:
+      containers:
+      - name: qdrant
+        image: {{ .Values.qdrant.image }}
+        ports:
+        - containerPort: {{ .Values.qdrant.port }}
+        - containerPort: {{ .Values.qdrant.grpcPort }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qdrant
+spec:
+  ports:
+  - port: 6333
+    name: http
+  - port: 6334
+    name: grpc
+  selector:
+    app: qdrant

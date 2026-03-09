@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.langchainApi.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: langchain-api
+  template:
+    metadata:
+      labels:
+        app: langchain-api
+    spec:
+      containers:
+      - name: langchain-api
+        image: {{ .Values.langchainApi.image }}
+        env:
+        - name: OLLAMA_URL
+          value: "http://ollama:11434"
+        - name: QDRANT_URL
+          value: "http://qdrant:6333"
+        ports:
+        - containerPort: {{ .Values.langchainApi.port }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: langchain-api
+spec:
+  ports:
+  - port: 8080
+  selector:
+    app: langchain-api

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: secure-llm-stack
+description: 사내 보안 가이드 챗봇을 위한 Helm 차트
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

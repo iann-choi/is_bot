@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.ollama.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ollama
+  template:
+    metadata:
+      labels:
+        app: ollama
+    spec:
+      containers:
+      - name: ollama
+        image: {{ .Values.ollama.image }}
+        ports:
+        - containerPort: {{ .Values.ollama.port }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ollama
+spec:
+  ports:
+  - port: 11434
+  selector:
+    app: ollama

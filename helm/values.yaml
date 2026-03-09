@@ -1,0 +1,28 @@
+# 공통 네임스페이스
+namespace: llm-chatbot
+
+# 1. Ollama 설정
+ollama:
+  name: ollama
+  image: ollama/ollama:latest
+  port: 11434
+
+# 2. Qdrant 설정 (Vector DB)
+qdrant:
+  name: qdrant
+  image: qdrant/qdrant:latest
+  port: 6333
+  grpcPort: 6334
+
+# 3. LangChain API 설정 (커스텀 RAG 서버)
+langchainApi:
+  name: langchain-api
+  image: your-repo/langchain-rag-api:latest
+  port: 8080
+
+# 4. Open WebUI 설정 (프론트엔드)
+openWebui:
+  name: open-webui
+  image: ghcr.io/open-webui/open-webui:main
+  serviceType: LoadBalancer
+  port: 8080

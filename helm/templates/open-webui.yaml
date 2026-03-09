@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.openWebui.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: open-webui
+  template:
+    metadata:
+      labels:
+        app: open-webui
+    spec:
+      containers:
+      - name: open-webui
+        image: {{ .Values.openWebui.image }}
+        env:
+        - name: OPENAI_API_BASE_URL
+          value: "http://langchain-api:8080"
+        - name: OPENAI_API_KEY
+          value: "sk-secure-internal-key"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: open-webui
+spec:
+  type: {{ .Values.openWebui.serviceType }}
+  ports:
+  - port: 3000
+    targetPort: 8080
+  selector:
+    app: open-webui
