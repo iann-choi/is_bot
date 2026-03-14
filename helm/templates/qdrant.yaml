@@ -1,7 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.qdrant.name }}
+  name: qdrant
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: qdrant
+    {{- include "is-bot.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
@@ -13,21 +17,53 @@ spec:
         app: qdrant
     spec:
       containers:
-      - name: qdrant
-        image: {{ .Values.qdrant.image }}
-        ports:
-        - containerPort: {{ .Values.qdrant.port }}
-        - containerPort: {{ .Values.qdrant.grpcPort }}
+        - name: qdrant
+          image: {{ .Values.qdrant.image }}
+          ports:
+            - containerPort: {{ .Values.qdrant.port }}
+              name: http
+            - containerPort: {{ .Values.qdrant.grpcPort }}
+              name: grpc
+          resources:
+            {{- toYaml .Values.qdrant.resources | nindent 12 }}
+          volumeMounts:
+            - name: storage
+              mountPath: /qdrant/storage
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.qdrant.port }}
+            initialDelaySeconds: 20
+            periodSeconds: 20
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.qdrant.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: qdrant-storage
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: qdrant
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: qdrant
+    {{- include "is-bot.labels" . | nindent 4 }}
 spec:
+  type: ClusterIP
   ports:
-  - port: 6333
-    name: http
-  - port: 6334
-    name: grpc
+    - port: {{ .Values.qdrant.port }}
+      targetPort: {{ .Values.qdrant.port }}
+      name: http
+    - port: {{ .Values.qdrant.grpcPort }}
+      targetPort: {{ .Values.qdrant.grpcPort }}
+      name: grpc
   selector:
     app: qdrant

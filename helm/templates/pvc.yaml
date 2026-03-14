@@ -1,0 +1,56 @@
+# ── Ollama 모델 저장소 ──────────────────────────────────────────
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ollama-models
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: ollama
+    {{- include "is-bot.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.ollama.persistence.size }}
+  {{- if .Values.ollama.persistence.storageClass }}
+  storageClassName: {{ .Values.ollama.persistence.storageClass }}
+  {{- end }}
+---
+# ── Qdrant 벡터 데이터 저장소 ───────────────────────────────────
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: qdrant-storage
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: qdrant
+    {{- include "is-bot.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.qdrant.persistence.size }}
+  {{- if .Values.qdrant.persistence.storageClass }}
+  storageClassName: {{ .Values.qdrant.persistence.storageClass }}
+  {{- end }}
+---
+# ── Open WebUI 데이터 저장소 ────────────────────────────────────
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: open-webui-data
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: open-webui
+    {{- include "is-bot.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.openWebui.persistence.size }}
+  {{- if .Values.openWebui.persistence.storageClass }}
+  storageClassName: {{ .Values.openWebui.persistence.storageClass }}
+  {{- end }}

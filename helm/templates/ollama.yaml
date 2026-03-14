@@ -1,7 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.ollama.name }}
+  name: ollama
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: ollama
+    {{- include "is-bot.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
@@ -12,18 +16,52 @@ spec:
       labels:
         app: ollama
     spec:
+      {{- if .Values.ollama.gpu.enabled }}
+      nodeSelector:
+        {{- toYaml .Values.ollama.gpu.nodeSelector | nindent 8 }}
+      {{- end }}
       containers:
-      - name: ollama
-        image: {{ .Values.ollama.image }}
-        ports:
-        - containerPort: {{ .Values.ollama.port }}
+        - name: ollama
+          image: {{ .Values.ollama.image }}
+          ports:
+            - containerPort: {{ .Values.ollama.port }}
+          resources:
+            {{- toYaml .Values.ollama.resources | nindent 12 }}
+          volumeMounts:
+            - name: models
+              mountPath: /root/.ollama
+          livenessProbe:
+            httpGet:
+              path: /api/tags
+              port: {{ .Values.ollama.port }}
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /api/tags
+              port: {{ .Values.ollama.port }}
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+      volumes:
+        - name: models
+          persistentVolumeClaim:
+            claimName: ollama-models
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: ollama
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: ollama
+    {{- include "is-bot.labels" . | nindent 4 }}
 spec:
+  type: ClusterIP
   ports:
-  - port: 11434
+    - port: {{ .Values.ollama.port }}
+      targetPort: {{ .Values.ollama.port }}
+      name: http
   selector:
     app: ollama

@@ -1,7 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.openWebui.name }}
+  name: open-webui
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: open-webui
+    {{- include "is-bot.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
@@ -13,22 +17,59 @@ spec:
         app: open-webui
     spec:
       containers:
-      - name: open-webui
-        image: {{ .Values.openWebui.image }}
-        env:
-        - name: OPENAI_API_BASE_URL
-          value: "http://langchain-api:8080"
-        - name: OPENAI_API_KEY
-          value: "sk-secure-internal-key"
+        - name: open-webui
+          image: {{ .Values.openWebui.image }}
+          ports:
+            - containerPort: {{ .Values.openWebui.port }}
+          env:
+            - name: OPENAI_API_BASE_URL
+              value: "http://langchain-api.{{ .Values.namespace }}.svc.cluster.local:{{ .Values.langchainApi.port }}/v1"
+            - name: OPENAI_API_KEY
+              value: "sk-internal"
+            - name: WEBUI_AUTH
+              value: {{ .Values.openWebui.auth | quote }}
+            - name: WEBUI_NAME
+              value: {{ .Values.openWebui.name | quote }}
+          resources:
+            {{- toYaml .Values.openWebui.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /app/backend/data
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.openWebui.port }}
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.openWebui.port }}
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: open-webui-data
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: open-webui
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: open-webui
+    {{- include "is-bot.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.openWebui.serviceType }}
   ports:
-  - port: 3000
-    targetPort: 8080
+    - port: {{ .Values.openWebui.servicePort }}
+      targetPort: {{ .Values.openWebui.port }}
+      name: http
+      {{- if and (eq .Values.openWebui.serviceType "NodePort") .Values.openWebui.nodePort }}
+      nodePort: {{ .Values.openWebui.nodePort }}
+      {{- end }}
   selector:
     app: open-webui

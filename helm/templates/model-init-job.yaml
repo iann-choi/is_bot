@@ -1,0 +1,38 @@
+# Helm post-install/post-upgrade 훅: Ollama 모델 자동 다운로드
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ollama-model-init
+  namespace: {{ .Values.namespace }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation
+  labels:
+    {{- include "is-bot.labels" . | nindent 4 }}
+spec:
+  activeDeadlineSeconds: 3600   # 모델 다운로드 최대 1시간
+  backoffLimit: 3
+  template:
+    spec:
+      containers:
+        - name: model-puller
+          image: curlimages/curl:8.11.0
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              OLLAMA="http://ollama.{{ .Values.namespace }}.svc.cluster.local:{{ .Values.ollama.port }}"
+              echo ">>> Ollama 준비 대기..."
+              until curl -sf "$OLLAMA/api/tags" > /dev/null; do
+                echo "  대기 중..."; sleep 5
+              done
+              echo ">>> LLM 모델 다운로드: {{ .Values.ollama.model }}"
+              curl -sf -X POST "$OLLAMA/api/pull" \
+                -H "Content-Type: application/json" \
+                -d "{\"name\":\"{{ .Values.ollama.model }}\"}"
+              echo ">>> 임베딩 모델 다운로드: {{ .Values.ollama.embedModel }}"
+              curl -sf -X POST "$OLLAMA/api/pull" \
+                -H "Content-Type: application/json" \
+                -d "{\"name\":\"{{ .Values.ollama.embedModel }}\"}"
+              echo ">>> 완료"
+      restartPolicy: OnFailure

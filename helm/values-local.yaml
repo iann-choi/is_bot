@@ -1,0 +1,30 @@
+# ────────────────────────────────────────────────────────────────
+# 로컬 맥북 환경 (Docker Desktop K8s / minikube)
+# 사용법: helm upgrade --install is-bot ./helm -f helm/values-local.yaml
+# ────────────────────────────────────────────────────────────────
+
+ollama:
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "2Gi"
+    limits:
+      cpu: "4"
+      memory: "8Gi"
+  persistence:
+    size: 20Gi
+    storageClass: "hostpath"    # Docker Desktop 기본값
+
+qdrant:
+  persistence:
+    size: 5Gi
+    storageClass: "hostpath"
+
+openWebui:
+  serviceType: NodePort
+  nodePort: 30300             # http://localhost:30300 으로 접근
+  persistence:
+    storageClass: "hostpath"
+
+ingress:
+  enabled: false

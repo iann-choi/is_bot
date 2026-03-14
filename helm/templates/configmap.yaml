@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: langchain-api-config
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: langchain-api
+    {{- include "is-bot.labels" . | nindent 4 }}
+data:
+  OLLAMA_URL: "http://ollama.{{ .Values.namespace }}.svc.cluster.local:{{ .Values.ollama.port }}"
+  QDRANT_URL: "http://qdrant.{{ .Values.namespace }}.svc.cluster.local:{{ .Values.qdrant.port }}"
+  OLLAMA_MODEL: {{ .Values.ollama.model | quote }}
+  EMBED_MODEL: {{ .Values.ollama.embedModel | quote }}
+  EMBED_DIM: {{ .Values.langchainApi.embedDim | quote }}
+  COLLECTION_NAME: {{ .Values.langchainApi.collectionName | quote }}

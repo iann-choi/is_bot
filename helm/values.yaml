@@ -1,28 +1,80 @@
-# 공통 네임스페이스
-namespace: llm-chatbot
+namespace: is-bot
 
-# 1. Ollama 설정
+# ── Ollama (LLM 추론 서버) ────────────────────────────────────────
 ollama:
-  name: ollama
   image: ollama/ollama:latest
+  model: gemma3:4b          # 기본 LLM 모델
+  embedModel: nomic-embed-text  # 임베딩 모델
   port: 11434
+  resources:
+    requests:
+      cpu: "1"
+      memory: "4Gi"
+    limits:
+      cpu: "4"
+      memory: "8Gi"
+  persistence:
+    size: 20Gi
+    storageClass: ""          # 빈 값 = 클러스터 기본 StorageClass 사용
+  gpu:
+    enabled: false
+    nodeSelector: {}          # 예: { accelerator: nvidia }
 
-# 2. Qdrant 설정 (Vector DB)
+# ── Qdrant (Vector DB) ────────────────────────────────────────────
 qdrant:
-  name: qdrant
-  image: qdrant/qdrant:latest
+  image: qdrant/qdrant:v1.13.2
   port: 6333
   grpcPort: 6334
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "512Mi"
+    limits:
+      cpu: "2"
+      memory: "2Gi"
+  persistence:
+    size: 10Gi
+    storageClass: ""
 
-# 3. LangChain API 설정 (커스텀 RAG 서버)
+# ── LangChain RAG API (FastAPI 백엔드) ───────────────────────────
 langchainApi:
-  name: langchain-api
-  image: your-repo/langchain-rag-api:latest
+  image: your-registry/is-bot-api:latest
   port: 8080
+  replicas: 1
+  embedDim: 768             # nomic-embed-text 기준
+  collectionName: security_docs
+  resources:
+    requests:
+      cpu: "250m"
+      memory: "512Mi"
+    limits:
+      cpu: "1"
+      memory: "1Gi"
 
-# 4. Open WebUI 설정 (프론트엔드)
+# ── Open WebUI (채팅 프론트엔드) ──────────────────────────────────
 openWebui:
-  name: open-webui
   image: ghcr.io/open-webui/open-webui:main
-  serviceType: LoadBalancer
   port: 8080
+  serviceType: ClusterIP
+  servicePort: 3000
+  nodePort: null            # serviceType: NodePort 일 때만 사용
+  auth: false               # 사내 환경: 인증 비활성화
+  name: "사내 정보보호 챗봇"
+  resources:
+    requests:
+      cpu: "250m"
+      memory: "256Mi"
+    limits:
+      cpu: "1"
+      memory: "512Mi"
+  persistence:
+    size: 2Gi
+    storageClass: ""
+
+# ── Ingress ───────────────────────────────────────────────────────
+ingress:
+  enabled: false
+  className: nginx
+  host: is-bot.internal
+  tls: false
+  annotations: {}

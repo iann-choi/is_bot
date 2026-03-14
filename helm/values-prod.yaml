@@ -1,0 +1,45 @@
+# ────────────────────────────────────────────────────────────────
+# 프로덕션 환경 (AWS EKS / 온프레미스 K8s)
+# 사용법: helm upgrade --install is-bot ./helm -f helm/values-prod.yaml
+# ────────────────────────────────────────────────────────────────
+
+langchainApi:
+  image: your-registry/is-bot-api:latest   # 실제 이미지로 교체 필요
+  replicas: 2
+
+ollama:
+  model: gemma3:12b           # 프로덕션: 더 큰 모델
+  resources:
+    requests:
+      cpu: "4"
+      memory: "16Gi"
+    limits:
+      cpu: "8"
+      memory: "32Gi"
+  persistence:
+    size: 50Gi
+    storageClass: "gp3"       # AWS: gp3 / 온프레미스: 환경에 맞게 변경
+  # GPU 서버 보유 시 아래 주석 해제
+  # gpu:
+  #   enabled: true
+  #   nodeSelector:
+  #     accelerator: nvidia
+
+qdrant:
+  persistence:
+    size: 50Gi
+    storageClass: "gp3"
+
+openWebui:
+  serviceType: ClusterIP
+  persistence:
+    storageClass: "gp3"
+
+ingress:
+  enabled: true
+  className: nginx
+  host: is-bot.company.internal    # 실제 내부 도메인으로 교체
+  tls: false                        # 사내 인증서 있으면 true
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
