@@ -39,14 +39,14 @@ spec:
             httpGet:
               path: /
               port: {{ .Values.openWebui.port }}
-            initialDelaySeconds: 30
+            initialDelaySeconds: 120
             periodSeconds: 30
             timeoutSeconds: 10
           readinessProbe:
             httpGet:
               path: /
               port: {{ .Values.openWebui.port }}
-            initialDelaySeconds: 20
+            initialDelaySeconds: 60
             periodSeconds: 10
             timeoutSeconds: 5
       volumes:

@@ -19,11 +19,19 @@ spec:
       containers:
         - name: langchain-api
           image: {{ .Values.langchainApi.image }}
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: {{ .Values.langchainApi.port }}
           envFrom:
             - configMapRef:
                 name: langchain-api-config
+          {{- if .Values.langchainApi.extraEnv }}
+          env:
+            {{- range $key, $val := .Values.langchainApi.extraEnv }}
+            - name: {{ $key }}
+              value: {{ $val | quote }}
+            {{- end }}
+          {{- end }}
           resources:
             {{- toYaml .Values.langchainApi.resources | nindent 12 }}
           livenessProbe:
