@@ -14,6 +14,7 @@ from typing import List, Optional
 
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from rag import RAGService
@@ -32,6 +33,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="IS Bot RAG API", lifespan=lifespan)
+app.mount("/static", StaticFiles(directory="/app/docs/images"), name="static")
 
 
 # --- 요청/응답 스키마 ---

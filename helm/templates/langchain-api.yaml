@@ -65,3 +65,21 @@ spec:
       name: http
   selector:
     app: langchain-api
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: langchain-api-static
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: langchain-api
+    {{- include "is-bot.labels" . | nindent 4 }}
+spec:
+  type: NodePort
+  ports:
+    - port: {{ .Values.langchainApi.port }}
+      targetPort: {{ .Values.langchainApi.port }}
+      nodePort: {{ .Values.langchainApi.staticNodePort }}
+      name: static
+  selector:
+    app: langchain-api

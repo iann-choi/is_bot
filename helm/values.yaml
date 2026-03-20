@@ -41,6 +41,7 @@ langchainApi:
   image: your-registry/is-bot-api:latest
   port: 8080
   replicas: 1
+  staticNodePort: 31001
   embedDim: 768             # nomic-embed-text 기준
   collectionName: security_docs
   resources:

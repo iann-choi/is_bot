@@ -3,6 +3,8 @@ FROM python:3.12-slim
 # uv 바이너리 복사 (공식 권장 방법)
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 # 의존성 파일 먼저 복사 (레이어 캐시 활용)
