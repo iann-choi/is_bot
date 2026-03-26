@@ -36,21 +36,21 @@ spec:
   storageClassName: {{ .Values.qdrant.persistence.storageClass }}
   {{- end }}
 ---
-# ── Open WebUI 데이터 저장소 ────────────────────────────────────
+# ── PostgreSQL 대화 기록 저장소 ──────────────────────────────────
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: open-webui-data
+  name: postgresql-pvc
   namespace: {{ .Values.namespace }}
   labels:
-    app: open-webui
+    app: postgresql
     {{- include "is-bot.labels" . | nindent 4 }}
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: {{ .Values.openWebui.persistence.size }}
-  {{- if .Values.openWebui.persistence.storageClass }}
-  storageClassName: {{ .Values.openWebui.persistence.storageClass }}
+      storage: {{ .Values.postgresql.persistence.size }}
+  {{- if .Values.postgresql.persistence.storageClass }}
+  storageClassName: {{ .Values.postgresql.persistence.storageClass }}
   {{- end }}

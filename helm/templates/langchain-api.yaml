@@ -19,7 +19,7 @@ spec:
       containers:
         - name: langchain-api
           image: {{ .Values.langchainApi.image }}
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: {{ .Values.langchainApi.imagePullPolicy | default "IfNotPresent" }}
           ports:
             - containerPort: {{ .Values.langchainApi.port }}
           envFrom:

@@ -13,6 +13,7 @@
 import os
 import re
 import json
+from datetime import datetime
 from typing import AsyncGenerator
 
 from langchain_ollama import ChatOllama, OllamaEmbeddings
@@ -29,8 +30,9 @@ EMBED_MODEL = os.getenv("EMBED_MODEL", "nomic-embed-text")
 EMBED_DIM = int(os.getenv("EMBED_DIM", "768"))          # 임베딩 벡터 차원
 COLLECTION_NAME = os.getenv("COLLECTION_NAME", "security_docs")
 
-# 시스템 프롬프트: {context} 자리에 검색된 문서가 삽입됨
+# 시스템 프롬프트: {today}, {context} 자리에 값이 삽입됨
 SYSTEM_PROMPT = """당신은 사내 정보보호 챗봇입니다.
+현재 날짜와 시간은 {today}입니다. 날짜나 시간 관련 질문에는 반드시 이 값을 사용하고, 절대로 다른 날짜를 추측하거나 지어내지 마세요.
 당신의 이름은 "정보보호 어시스턴트"이며, 회사(aitrics) 내 정보보호 정책과 보안 관련 질문에 답변하기 위해 만들어졌습니다.
 절대로 외부 AI 서비스(Google, OpenAI 등)라고 밝히지 마세요.
 아래 참고 문서를 바탕으로 답변하되, 다음 규칙을 따르세요:
@@ -139,7 +141,8 @@ class RAGService:
             [HumanMessage(현재 질의)]
         """
         # 시스템 프롬프트에 검색된 문서 삽입
-        messages = [SystemMessage(content=SYSTEM_PROMPT.format(context=context))]
+        today = datetime.now().strftime("%Y년 %m월 %d일 %H시 %M분")
+        messages = [SystemMessage(content=SYSTEM_PROMPT.format(today=today, context=context))]
         # 마지막 user 메시지는 query로 별도 추가하므로 이력에서 제외
         for msg in history[:-1]:
             if msg["role"] == "user":

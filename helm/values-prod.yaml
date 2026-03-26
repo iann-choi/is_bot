@@ -30,10 +30,16 @@ qdrant:
     size: 50Gi
     storageClass: "gp3"
 
-openWebui:
-  serviceType: ClusterIP
+postgresql:
   persistence:
+    size: 20Gi
     storageClass: "gp3"
+
+web:
+  image: your-registry/is-bot-web:latest   # 실제 이미지로 교체 필요
+  replicas: 2
+  nextauthUrl: "https://is-bot.company.internal"
+  serviceType: ClusterIP
 
 ingress:
   enabled: true

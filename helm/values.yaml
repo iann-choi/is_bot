@@ -52,25 +52,25 @@ langchainApi:
       cpu: "1"
       memory: "1Gi"
 
-# ── Open WebUI (채팅 프론트엔드) ──────────────────────────────────
-openWebui:
-  image: ghcr.io/open-webui/open-webui:main
-  port: 8080
+# ── PostgreSQL (대화 기록 DB) ─────────────────────────────────────
+postgresql:
+  persistence:
+    size: 5Gi
+    storageClass: ""          # 빈 값 = 클러스터 기본 StorageClass 사용
+
+# ── IS Bot Web (Next.js 프론트엔드) ───────────────────────────────
+web:
+  image: your-registry/is-bot-web:latest
+  replicas: 1
+  nextauthUrl: "http://is-bot.internal"
   serviceType: ClusterIP
-  servicePort: 3000
-  nodePort: null            # serviceType: NodePort 일 때만 사용
-  auth: false               # 사내 환경: 인증 비활성화
-  name: "사내 정보보호 챗봇"
   resources:
     requests:
       cpu: "250m"
-      memory: "512Mi"
+      memory: "256Mi"
     limits:
       cpu: "1"
-      memory: "2Gi"
-  persistence:
-    size: 2Gi
-    storageClass: ""
+      memory: "512Mi"
 
 # ── Ingress ───────────────────────────────────────────────────────
 ingress:

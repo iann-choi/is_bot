@@ -20,15 +20,23 @@ qdrant:
     size: 5Gi
     storageClass: "local-path"
 
-openWebui:
-  serviceType: NodePort
-  nodePort: 30300             # http://localhost:30300 으로 접근
+langchainApi:
+  image: is-bot-api:latest
+  imagePullPolicy: Never
+  extraEnv:
+    OLLAMA_URL: "http://host.internal:11434"
+
+postgresql:
   persistence:
+    size: 5Gi
     storageClass: "local-path"
 
-langchainApi:
-  extraEnv:
-    OLLAMA_URL: "http://192.168.139.3:11434"
+web:
+  image: is-bot-web:latest
+  imagePullPolicy: Never
+  replicas: 1
+  serviceType: NodePort
+  nodePort: 30300
 
 ingress:
   enabled: false

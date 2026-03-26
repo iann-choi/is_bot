@@ -20,9 +20,9 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: open-webui
+                name: is-bot-web
                 port:
-                  number: {{ .Values.openWebui.servicePort }}
+                  number: 3001
   {{- if .Values.ingress.tls }}
   tls:
     - hosts:
