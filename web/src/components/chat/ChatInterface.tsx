@@ -155,12 +155,14 @@ export default function ChatInterface({ conversationId, initialMessages = [] }: 
         isStreaming={isStreaming}
         onExampleClick={handleExampleClick}
       />
-      <ChatInput
-        value={input}
-        onChange={setInput}
-        onSubmit={sendMessage}
-        disabled={isStreaming}
-      />
+      <div className="w-full">
+        <ChatInput
+          value={input}
+          onChange={setInput}
+          onSubmit={sendMessage}
+          disabled={isStreaming}
+        />
+      </div>
     </div>
   )
 }

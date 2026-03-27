@@ -10,6 +10,7 @@ datasource db {
 model Conversation {
   id        String    @id @default(cuid())
   title     String    @default("New Chat")
+  sessionId String    @default("")
   messages  Message[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

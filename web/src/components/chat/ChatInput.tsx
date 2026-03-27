@@ -45,7 +45,7 @@ export default function ChatInput({
   }
 
   return (
-    <div className="px-4 pb-4 pt-2">
+    <div className="px-4 pb-4 pt-2 max-w-3xl mx-auto w-full">
       <div
         className="relative flex items-end gap-2 rounded-2xl transition-all"
         style={{
